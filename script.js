@@ -4,22 +4,6 @@ const PALAVRAS_SUSPEITAS = [
     "conluio", "documento alterado", "valor inflado"
 ];
 
-// Função para ler arquivos de texto
-function lerArquivoTexto(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        
-        reader.onload = event => resolve(event.target.result);
-        reader.onerror = error => reject(error);
-        
-        if (file.name.endsWith('.txt')) {
-            reader.readAsText(file);
-        } else {
-            reject(new Error("Formato não suportado. Use arquivos .txt"));
-        }
-    });
-}
-
 // Função Principal
 async function analisarDocumento() {
     const fileInput = document.getElementById('documento');
@@ -27,23 +11,28 @@ async function analisarDocumento() {
     const textoExtraidoEl = document.getElementById('textoExtraido');
     
     // Reset
-    resultadoEl.innerHTML = "";
+    resultadoEl.innerHTML = "Analisando...";
     textoExtraidoEl.innerHTML = "";
 
     if (!fileInput.files[0]) {
-        resultadoEl.textContent = "Por favor, selecione um arquivo .txt";
+        resultadoEl.textContent = "Por favor, selecione um arquivo.";
         return;
     }
 
     const file = fileInput.files[0];
     
     try {
-        // Leitura do arquivo
-        const texto = await lerArquivoTexto(file);
-        
-        // Exibe o conteúdo (limitado a 1000 caracteres)
+        // Leitura do arquivo (método universal)
+        const texto = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = e => resolve(e.target.result);
+            reader.onerror = e => reject(new Error("Falha na leitura"));
+            reader.readAsText(file);
+        });
+
+        // Exibe o conteúdo (limitado)
         textoExtraidoEl.innerHTML = `
-            <strong>Conteúdo do arquivo:</strong>
+            <strong>Conteúdo do arquivo (${file.name}):</strong>
             <div style="max-height:200px; overflow-y:auto; border:1px solid #ddd; padding:10px; margin:10px 0;">
                 ${texto.length > 1000 ? texto.substring(0, 1000) + '...' : texto}
             </div>
@@ -60,8 +49,8 @@ async function analisarDocumento() {
             }
         });
 
-        // Verifica datas futuras
-        const datas = texto.match(/\d{2}\/\d{2}\/\d{4}/g) || [];
+        // Verifica datas futuras (formato DD/MM/YYYY)
+        const datas = texto.match(/\b\d{2}\/\d{2}\/\d{4}\b/g) || [];
         const hoje = new Date();
         datas.forEach(data => {
             const [dia, mes, ano] = data.split('/');
@@ -71,11 +60,11 @@ async function analisarDocumento() {
             }
         });
 
-        // Exibe Resultado
+        // Resultado
         if (problemas.length > 0) {
             resultadoEl.innerHTML = `
                 <div style="color:red; font-weight:bold;">
-                    ❌ DOCUMENTO SUSPEITO - ${problemas.length} PROBLEMAS DETECTADOS:
+                    ❌ PROBLEMAS ENCONTRADOS (${problemas.length})
                 </div>
                 <ul>${problemas.map(item => `<li>${item}</li>`).join('')}</ul>
             `;
@@ -84,16 +73,17 @@ async function analisarDocumento() {
                 <div style="color:green; font-weight:bold;">
                     ✅ DOCUMENTO VÁLIDO
                 </div>
-                Nenhuma irregularidade encontrada.
+                Nenhum termo suspeito encontrado.
             `;
         }
 
     } catch (error) {
         resultadoEl.innerHTML = `
             <div style="color:orange; font-weight:bold;">
-                ⚠ ERRO: ${error.message}
+                ⚠ ERRO NA ANÁLISE
             </div>
-            <p>Dica: Use apenas arquivos .txt</p>
+            <p>${error.message}</p>
+            <p>Formato suportado: .txt (UTF-8)</p>
         `;
     }
 }
