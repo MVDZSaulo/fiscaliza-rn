@@ -2,63 +2,28 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fiscaliza RN - Denuncie Documentos Adulterados</title>
+    <title>Fiscaliza RN</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="script.js"></script>
-    <script src="leitorTela.js"></script>
-    
 </head>
 <body>
-    <header aria-label="Cabeçalho">
-        <h1 tabindex="0">🔍 Fiscaliza RN</h1>
-        <p tabindex="0">Denuncie documentos suspeitos do governo do Rio Grande do Norte.</p>
-    </header>
-
-    <main aria-label="Área principal">
-        <div class="card" tabindex="0">
-            <h2 tabindex="0">Envie um Documento</h2>
-            <p tabindex="0">Selecione um arquivo (PDF, imagem ou texto):</p>
-            
-            <input 
-                type="file" 
-                id="documento" 
-                accept=".pdf,.png,.docx,.txt" 
-                aria-label="Selecione um documento para análise"
-
-            >
-            
-            <button 
-                onclick="analisarDocumento()" 
-                aria-label="Botão para analisar documento"
-                tabindex="0"
-            >
-                Analisar com IA
-            </button>
-            <button onclick="limparAnalise()">Limpar Análise</button>
+    <div class="container">
+        <h1>Fiscaliza RN</h1>
+        
+        <div class="card">
+            <h2>Analisar Documento</h2>
+            <input type="file" id="documento" accept=".txt">
+            <button onclick="analisarDocumento()">Analisar</button>
+            <button onclick="limparAnalise()">Limpar</button>
         </div>
 
-        <div id="resultado" class="card" tabindex="0" aria-live="polite">
-            <h2 tabindex="0">Resultado da Análise</h2>
-            <p id="textoResultado" tabindex="0">Nenhum documento analisado ainda.</p>
+        <!-- Área de resultados (SEMPRE no HTML) -->
+        <div class="card">
+            <h2>Resultado</h2>
+            <div id="textoResultado">Nenhum documento analisado ainda.</div>
+            <div id="textoExtraido" style="margin-top: 20px;"></div>
         </div>
-
-        <!-- Botão de leitura de tela -->
-        <button 
-            id="lerPagina" 
-            aria-label="Ouvir página" 
-            class="acessibilidade-btn"
-            tabindex="0"
-        >
-            🔊 Ouvir Página
-        </button>
-    </main>
-
-    <footer aria-label="Rodapé">
-        <p tabindex="0">© 2024 Fiscaliza RN - Projeto para Hackathon</p>
-    </footer>
+    </div>
 
     <script src="script.js"></script>
-    <script src="leitorTela.js"></script>
 </body>
 </html>
