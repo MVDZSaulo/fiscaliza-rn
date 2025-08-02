@@ -62,3 +62,44 @@ pre {
     padding: 10px;
     border-radius: 5px;
 }
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.card {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.conteudo-extraido {
+    max-height: 300px;
+    overflow-y: auto;
+    background: #fff;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.erro {
+    color: #d32f2f;
+    font-weight: bold;
+}
+
+.sucesso {
+    color: #388e3c;
+    font-weight: bold;
+}
+
+button {
+    background: #1976d2;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin-right: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
