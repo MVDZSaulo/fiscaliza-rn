@@ -56,3 +56,9 @@ button:hover {
 :focus {
     outline: 3px solid #3498db;
 }
+pre {
+    white-space: pre-wrap;
+    background: #f8f8f8;
+    padding: 10px;
+    border-radius: 5px;
+}
