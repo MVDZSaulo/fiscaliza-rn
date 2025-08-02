@@ -1,14 +1,24 @@
 // Configurações da Análise
 const PALAVRAS_SUSPEITAS = [
     "nepotismo", "fraude", "superfaturado", "falsificado",
-    "conluio", "documento alterado", "valor inflado", "lei inexistente",
-    "artigo adulterado", "cláusula fraudulenta", "proposta irregular"
+    "conluio", "documento alterado", "valor inflado"
 ];
 
-const TERMOS_INVALIDOS = [
-    "contrato sem licitação", "dispensa ilegal", "emergência fictícia",
-    "processo seletivo cancelado", "edital modificado"
-];
+// Função para ler arquivos de texto
+function lerArquivoTexto(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        
+        reader.onload = event => resolve(event.target.result);
+        reader.onerror = error => reject(error);
+        
+        if (file.name.endsWith('.txt')) {
+            reader.readAsText(file);
+        } else {
+            reject(new Error("Formato não suportado. Use arquivos .txt"));
+        }
+    });
+}
 
 // Função Principal
 async function analisarDocumento() {
@@ -16,52 +26,41 @@ async function analisarDocumento() {
     const resultadoEl = document.getElementById('textoResultado');
     const textoExtraidoEl = document.getElementById('textoExtraido');
     
+    // Reset
+    resultadoEl.innerHTML = "";
+    textoExtraidoEl.innerHTML = "";
+
     if (!fileInput.files[0]) {
-        resultadoEl.textContent = "Por favor, selecione um arquivo.";
+        resultadoEl.textContent = "Por favor, selecione um arquivo .txt";
         return;
     }
 
     const file = fileInput.files[0];
-    let texto = "";
-
+    
     try {
         // Leitura do arquivo
-        if (file.type === "text/plain" || file.name.endsWith('.txt')) {
-            texto = await file.text();
-        } else if (file.name.endsWith('.pdf')) {
-            texto = "[Conteúdo de PDF simulado] Para análise real, integre com API como PDF.js";
-        } else if (file.name.endsWith('.docx')) {
-            texto = "[Conteúdo de DOCX simulado] Use mammoth.js para extração real";
-        } else {
-            throw new Error("Formato não suportado");
-        }
-
-        // Exibe o texto (limitado a 500 caracteres)
+        const texto = await lerArquivoTexto(file);
+        
+        // Exibe o conteúdo (limitado a 1000 caracteres)
         textoExtraidoEl.innerHTML = `
-            <strong>Conteúdo extraído:</strong>
+            <strong>Conteúdo do arquivo:</strong>
             <div style="max-height:200px; overflow-y:auto; border:1px solid #ddd; padding:10px; margin:10px 0;">
-                ${texto.length > 500 ? texto.substring(0, 500) + '...' : texto}
+                ${texto.length > 1000 ? texto.substring(0, 1000) + '...' : texto}
             </div>
         `;
 
         // Análise do Texto
         const problemas = [];
+        const textoLower = texto.toLowerCase();
 
-        // 1. Verifica palavras suspeitas
+        // Verifica palavras suspeitas
         PALAVRAS_SUSPEITAS.forEach(palavra => {
-            if (texto.toLowerCase().includes(palavra)) {
+            if (textoLower.includes(palavra)) {
                 problemas.push(`Termo proibido: <strong>${palavra}</strong>`);
             }
         });
 
-        // 2. Verifica termos inválidos
-        TERMOS_INVALIDOS.forEach(termo => {
-            if (texto.toLowerCase().includes(termo.toLowerCase())) {
-                problemas.push(`Termo inválido: <strong>${termo}</strong>`);
-            }
-        });
-
-        // 3. Verifica datas futuras
+        // Verifica datas futuras
         const datas = texto.match(/\d{2}\/\d{2}\/\d{4}/g) || [];
         const hoje = new Date();
         datas.forEach(data => {
@@ -71,12 +70,6 @@ async function analisarDocumento() {
                 problemas.push(`Data futura: <strong>${data}</strong>`);
             }
         });
-
-        // 4. Verifica CPFs/CNPJs inválidos (simplificado)
-        const cpfs = texto.match(/\d{3}\.\d{3}\.\d{3}-\d{2}/g) || [];
-        if (cpfs.length > 5) { // Exemplo: Muitos CPFs podem ser sinal de lista irregular
-            problemas.push(`Quantidade suspeita de CPFs: <strong>${cpfs.length}</strong>`);
-        }
 
         // Exibe Resultado
         if (problemas.length > 0) {
@@ -98,15 +91,14 @@ async function analisarDocumento() {
     } catch (error) {
         resultadoEl.innerHTML = `
             <div style="color:orange; font-weight:bold;">
-                ⚠ ERRO NA ANÁLISE
+                ⚠ ERRO: ${error.message}
             </div>
-            ${error.message || "Formato de arquivo não suportado."}
+            <p>Dica: Use apenas arquivos .txt</p>
         `;
-        console.error(error);
     }
 }
 
-// Função para limpar o formulário
+// Função para limpar
 function limparAnalise() {
     document.getElementById('documento').value = "";
     document.getElementById('textoResultado').innerHTML = "";
