@@ -1,44 +1,30 @@
-// URL do arquivo JSON (substitua SEU_USUARIO pelo seu nome de usuário no GitHub)
-const DB_URL = 'https://raw.githubusercontent.com/SEU_USUARIO/fiscaliza-rn/main/db/denuncias.json';
-
-// Função para salvar denúncias (simulado)
-async function salvarDenuncia(documento, resultado) {
+// Simulação de banco de dados no localStorage
+function salvarDenuncia(documento, resultado) {
+    const denuncias = JSON.parse(localStorage.getItem('denuncias')) || [];
     const novaDenuncia = {
         id: Date.now(),
         nomeDocumento: documento.name,
         resultado: resultado,
         data: new Date().toLocaleDateString('pt-BR')
     };
-
-    // Fallback: Salva no localStorage
-    const denuncias = JSON.parse(localStorage.getItem('denuncias') || [];
     denuncias.push(novaDenuncia);
     localStorage.setItem('denuncias', JSON.stringify(denuncias));
-
-    console.log("Denúncia salva (localStorage):", novaDenuncia);
     return novaDenuncia;
 }
 
-// Função para analisar documentos
-async function analisarDocumento() {
-    const fileInput = document.getElementById('documento');
-    const resultadoEl = document.getElementById('textoResultado');
+function analisarDocumento() {
+    const file = document.getElementById('documento').files[0];
+    if (!file) return alert("Selecione um arquivo!");
     
-    if (!fileInput.files[0]) {
-        resultadoEl.textContent = "Por favor, selecione um arquivo.";
-        return;
-    }
-
-    const file = fileInput.files[0];
-    const isFraudulento = Math.random() > 0.5; // Simulação de IA
+    const isFraudulento = Math.random() > 0.5;
     const resultado = isFraudulento ? 
-        "❌ Documento suspeito: Assinatura inconsistente." : 
-        "✅ Documento válido: Nenhuma irregularidade.";
-
-    const denuncia = await salvarDenuncia(file, resultado);
-    resultadoEl.innerHTML = `
-        ${resultado}<br><br>
-        <strong>Nº da Denúncia:</strong> ${denuncia.id}<br>
+        "❌ Documento suspeito detectado!" : 
+        "✅ Documento válido!";
+    
+    const denuncia = salvarDenuncia(file, resultado);
+    document.getElementById('textoResultado').innerHTML = `
+        ${resultado}<br>
+        <small>ID: ${denuncia.id}</small><br>
         <button onclick="location.reload()">Nova Análise</button>
     `;
 }
