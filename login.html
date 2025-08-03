@@ -20,7 +20,7 @@
     form {
       background: white;
       padding: 20px;
-      margin-bottom: 30px;
+      margin-bottom: 10px;
       border-radius: 8px;
       box-shadow: 0 3px 7px rgba(0,0,0,0.1);
     }
@@ -58,28 +58,53 @@
       background-color: #f8d7da;
       color: #721c24;
     }
+    .link-troca {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    .link-troca a {
+      color: #2c3e50;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    #formCadastro {
+      display: none;
+    }
   </style>
 </head>
 <body>
 
-  <h2>Cadastro</h2>
-  <form id="formCadastro">
-    <input type="text" id="nome" placeholder="Nome completo" required />
-    <input type="email" id="emailCadastro" placeholder="E-mail" required />
-    <input type="password" id="senhaCadastro" placeholder="Senha (mínimo 6 caracteres)" minlength="6" required />
-    <button type="submit">Cadastrar</button>
-    <div id="msgCadastro" class="msg"></div>
-  </form>
+  <!-- Login -->
+  <div id="containerLogin">
+    <h2>Login</h2>
+    <form id="formLogin">
+      <input type="email" id="emailLogin" placeholder="E-mail" required />
+      <input type="password" id="senhaLogin" placeholder="Senha" required />
+      <button type="submit">Entrar</button>
+      <div id="msgLogin" class="msg"></div>
+    </form>
+    <div class="link-troca">
+      Não tem uma conta? <a id="mostrarCadastro">Registre-se</a>
+    </div>
+  </div>
 
-  <h2>Login</h2>
-  <form id="formLogin">
-    <input type="email" id="emailLogin" placeholder="E-mail" required />
-    <input type="password" id="senhaLogin" placeholder="Senha" required />
-    <button type="submit">Entrar</button>
-    <div id="msgLogin" class="msg"></div>
-  </form>
+  <!-- Cadastro -->
+  <div id="containerCadastro">
+    <h2>Cadastro</h2>
+    <form id="formCadastro">
+      <input type="text" id="nome" placeholder="Nome completo" required />
+      <input type="email" id="emailCadastro" placeholder="E-mail" required />
+      <input type="password" id="senhaCadastro" placeholder="Senha (mínimo 6 caracteres)" minlength="6" required />
+      <button type="submit">Cadastrar</button>
+      <div id="msgCadastro" class="msg"></div>
+    </form>
+    <div class="link-troca">
+      Já tem uma conta? <a id="mostrarLogin">Fazer login</a>
+    </div>
+  </div>
 
-  <!-- Firebase SDKs -->
+  <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
@@ -98,7 +123,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Cadastro
     const formCadastro = document.getElementById('formCadastro');
     const msgCadastro = document.getElementById('msgCadastro');
 
@@ -133,7 +157,6 @@
       }
     });
 
-    // Login
     const formLogin = document.getElementById('formLogin');
     const msgLogin = document.getElementById('msgLogin');
 
@@ -151,7 +174,6 @@
         msgLogin.classList.add('sucesso');
         formLogin.reset();
 
-        // Espera um pouco antes de redirecionar
         setTimeout(() => {
           window.location.href = 'index.html';
         }, 1500);
@@ -159,6 +181,22 @@
         msgLogin.textContent = "❌ E-mail ou senha inválidos.";
         msgLogin.classList.add('erro');
       }
+    });
+
+    // Alternar entre formulários
+    const mostrarCadastro = document.getElementById('mostrarCadastro');
+    const mostrarLogin = document.getElementById('mostrarLogin');
+    const containerCadastro = document.getElementById('containerCadastro');
+    const containerLogin = document.getElementById('containerLogin');
+
+    mostrarCadastro.addEventListener('click', () => {
+      containerLogin.style.display = 'none';
+      containerCadastro.style.display = 'block';
+    });
+
+    mostrarLogin.addEventListener('click', () => {
+      containerCadastro.style.display = 'none';
+      containerLogin.style.display = 'block';
     });
   </script>
 
