@@ -95,4 +95,5 @@ formLogin.addEventListener('submit', async (e) => {
     msgLogin.textContent = "❌ E-mail ou senha inválidos.";
     msgLogin.classList.add('erro');
   }
+
 });
