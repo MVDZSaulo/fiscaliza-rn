@@ -205,3 +205,23 @@ function limparAnalise() {
     elementos.resultadoIndividual.innerHTML = "Nenhum documento analisado ainda.";
     elementos.textoExtraido.innerHTML = "";
 }
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+
+async function login(email, password) {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const token = await userCredential.user.getIdToken();
+    
+    // Envie este token para seu backend Python
+    const response = await fetch('/api/verify-token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token })
+    });
+    
+    return await response.json();
+  } catch (error) {
+    console.error("Erro no login:", error);
+    throw error;
+  }
+}
