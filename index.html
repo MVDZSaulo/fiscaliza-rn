@@ -7,6 +7,18 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <script>
+    // Verifica se o usuário está autenticado
+    if (!localStorage.getItem('isAuthenticated')) {
+        window.location.href = 'login.html';
+    }
+    
+    // Função de logout (adicione um botão de logout no seu sistema)
+    function logout() {
+        localStorage.removeItem('isAuthenticated');
+        window.location.href = 'login.html';
+    }
+</script>
     <div class="container">
         <header>
             <h1>Fiscaliza RN</h1>
