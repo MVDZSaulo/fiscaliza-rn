@@ -1,104 +1,166 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Fiscaliza RN</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f5f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        
-        .login-container {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            width: 350px;
-            text-align: center;
-        }
-        
-        .logo {
-            width: 150px;
-            margin-bottom: 20px;
-        }
-        
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 30px;
-        }
-        
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 10px;
-        }
-        
-        button:hover {
-            background-color: #2980b9;
-        }
-        
-        .error {
-            color: #e74c3c;
-            margin-top: 10px;
-            font-size: 14px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fiscaliza RN - Cadastro e Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 400px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f7fa;
+      color: #2c3e50;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      box-shadow: 0 3px 7px rgba(0,0,0,0.1);
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+    button {
+      background-color: #2c3e50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #1b2736;
+    }
+    .msg {
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 10px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .sucesso {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .erro {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+  </style>
 </head>
 <body>
-    <div class="login-container">
-        <img src="https://via.placeholder.com/150x50?text=Fiscaliza+RN" alt="Logo Fiscaliza RN" class="logo">
-        <h1>Acesso ao Sistema</h1>
-        
-        <form id="loginForm">
-            <input type="text" id="username" placeholder="Usuário" required>
-            <input type="password" id="password" placeholder="Senha" required>
-            <button type="submit">Entrar</button>
-        </form>
-        
-        <div id="errorMessage" class="error"></div>
-    </div>
 
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const errorElement = document.getElementById('errorMessage');
-            
-            // Credenciais de exemplo (em produção, use autenticação segura)
-            if (username === 'admin' && password === 'fiscaliza2023') {
-                // Salva o estado de login no localStorage
-                localStorage.setItem('isAuthenticated', 'true');
-                
-                // Redireciona para a página principal
-                window.location.href = 'index.html';
-            } else {
-                errorElement.textContent = 'Usuário ou senha incorretos';
-            }
+  <h2>Cadastro</h2>
+  <form id="formCadastro">
+    <input type="text" id="nome" placeholder="Nome completo" required />
+    <input type="email" id="emailCadastro" placeholder="E-mail" required />
+    <input type="password" id="senhaCadastro" placeholder="Senha (mínimo 6 caracteres)" minlength="6" required />
+    <button type="submit">Cadastrar</button>
+    <div id="msgCadastro" class="msg"></div>
+  </form>
+
+  <h2>Login</h2>
+  <form id="formLogin">
+    <input type="email" id="emailLogin" placeholder="E-mail" required />
+    <input type="password" id="senhaLogin" placeholder="Senha" required />
+    <button type="submit">Entrar</button>
+    <div id="msgLogin" class="msg"></div>
+  </form>
+
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBx-Y8qRzds70GYvlJK9rifeHTzKFNG1Ss",
+      authDomain: "fiscalizarn-b4e81.firebaseapp.com",
+      projectId: "fiscalizarn-b4e81",
+      storageBucket: "fiscalizarn-b4e81.firebasestorage.app",
+      messagingSenderId: "486825833189",
+      appId: "1:486825833189:web:057a8cba57182431d19a0c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Cadastro
+    const formCadastro = document.getElementById('formCadastro');
+    const msgCadastro = document.getElementById('msgCadastro');
+
+    formCadastro.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msgCadastro.textContent = '';
+      msgCadastro.className = 'msg';
+
+      const nome = document.getElementById('nome').value.trim();
+      const email = document.getElementById('emailCadastro').value.trim();
+      const senha = document.getElementById('senhaCadastro').value;
+
+      if (senha.length < 6) {
+        msgCadastro.textContent = 'Senha deve ter no mínimo 6 caracteres.';
+        msgCadastro.classList.add('erro');
+        return;
+      }
+
+      try {
+        const userCred = await createUserWithEmailAndPassword(auth, email, senha);
+        await addDoc(collection(db, "usuarios"), {
+          uid: userCred.user.uid,
+          nome: nome,
+          email: email
         });
-    </script>
+        msgCadastro.textContent = "✅ Cadastro realizado com sucesso! Você já pode fazer login.";
+        msgCadastro.classList.add('sucesso');
+        formCadastro.reset();
+      } catch (error) {
+        msgCadastro.textContent = "❌ Erro: " + error.message;
+        msgCadastro.classList.add('erro');
+      }
+    });
+
+    // Login
+    const formLogin = document.getElementById('formLogin');
+    const msgLogin = document.getElementById('msgLogin');
+
+    formLogin.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msgLogin.textContent = '';
+      msgLogin.className = 'msg';
+
+      const email = document.getElementById('emailLogin').value.trim();
+      const senha = document.getElementById('senhaLogin').value;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, senha);
+        msgLogin.textContent = "✅ Login efetuado com sucesso! Redirecionando...";
+        msgLogin.classList.add('sucesso');
+        formLogin.reset();
+
+        // Espera um pouco antes de redirecionar
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1500);
+      } catch (error) {
+        msgLogin.textContent = "❌ E-mail ou senha inválidos.";
+        msgLogin.classList.add('erro');
+      }
+    });
+  </script>
+
 </body>
 </html>
