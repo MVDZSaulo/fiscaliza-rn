@@ -2,26 +2,48 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Fiscaliza RN</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiscaliza RN - Análise de Documentos</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>Fiscaliza RN</h1>
-        
-        <div class="card">
-            <h2>Analisar Documento</h2>
-            <input type="file" id="documento" accept=".txt">
-            <button onclick="analisarDocumento()">Analisar</button>
-            <button onclick="limparAnalise()">Limpar</button>
-        </div>
+        <header>
+            <h1>Fiscaliza RN</h1>
+            <p>Sistema de análise de documentos públicos</p>
+        </header>
 
-        <!-- Área de resultados (SEMPRE no HTML) -->
-        <div class="card">
-            <h2>Resultado</h2>
-            <div id="textoResultado">Nenhum documento analisado ainda.</div>
-            <div id="textoExtraido" style="margin-top: 20px;"></div>
-        </div>
+        <main>
+            <div class="card">
+                <h2>Análise Individual</h2>
+                <input type="file" id="documento" accept=".txt">
+                <button onclick="analisarDocumento()">Analisar</button>
+                <button onclick="limparAnalise()">Limpar</button>
+                
+                <div id="textoResultado">Nenhum documento analisado ainda.</div>
+                <div id="textoExtraido"></div>
+            </div>
+
+            <div class="card">
+                <h2>Comparar Documentos</h2>
+                <div class="file-inputs">
+                    <div>
+                        <label for="documento1">Documento 1:</label>
+                        <input type="file" id="documento1" accept=".txt">
+                    </div>
+                    <div>
+                        <label for="documento2">Documento 2:</label>
+                        <input type="file" id="documento2" accept=".txt">
+                    </div>
+                </div>
+                <button onclick="compararDocumentos()">Comparar</button>
+                <div id="resultadoComparacao"></div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Projeto desenvolvido para o Hackathon Fiscaliza RN</p>
+        </footer>
     </div>
 
     <script src="script.js"></script>
