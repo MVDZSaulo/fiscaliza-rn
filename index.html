@@ -7,18 +7,6 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <script>
-    // Verifica se o usuário está autenticado
-    if (!localStorage.getItem('isAuthenticated')) {
-        window.location.href = 'login.html';
-    }
-    
-    // Função de logout (adicione um botão de logout no seu sistema)
-    function logout() {
-        localStorage.removeItem('isAuthenticated');
-        window.location.href = 'login.html';
-    }
-</script>
     <div class="container">
         <header>
             <h1>Fiscaliza RN</h1>
@@ -48,7 +36,6 @@
                         <input type="file" id="documento2" accept=".txt">
                     </div>
                 </div>
-                <button onclick="logout()" style="position: absolute; top: 20px; right: 20px;">Sair</button>
                 <button onclick="compararDocumentos()">Comparar</button>
                 <div id="resultadoComparacao"></div>
             </div>
@@ -60,6 +47,5 @@
     </div>
 
     <script src="script.js"></script>
-
 </body>
 </html>
