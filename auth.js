@@ -7,12 +7,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
 import { 
   getFirestore, 
-  collection, 
-  addDoc,
-  doc,
-  setDoc
+  doc, 
+  setDoc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
+// Sua configuração do Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBx-Y8qRzds70GYvlJK9rifeHTzKFNG1Ss",
   authDomain: "fiscalizarn-b4e81.firebaseapp.com",
@@ -22,55 +22,67 @@ const firebaseConfig = {
   appId: "1:486825833189:web:057a8cba57182431d19a0c"
 };
 
+// Inicializa o Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Cria usuário admin padrão (executa ao carregar)
-async function criarAdminPadrao() {
-  const emailAdmin = "admin@fiscalizarn.com";
-  const senhaAdmin = "Admin@1234";
-  const codigoAdmin = "ADMIN-2023";
-
+// 1. Verifica e cria admin padrão se necessário
+async function verificarAdmin() {
+  const adminEmail = "admin@fiscalizarn.com";
+  const adminSenha = "Admin@1234";
+  
   try {
-    // Verifica se o admin já existe
-    signInWithEmailAndPassword(auth, emailAdmin, senhaAdmin)
-      .catch(async (error) => {
-        if (error.code === "auth/user-not-found") {
-          const userCred = await createUserWithEmailAndPassword(auth, emailAdmin, senhaAdmin);
-          await setDoc(doc(db, "usuarios", userCred.user.uid), {
-            nome: "Administrador",
-            email: emailAdmin,
-            role: "admin",
-            criadoEm: new Date()
-          });
-          console.log("✅ Admin criado com sucesso");
-          auth.signOut(); // Desconecta após criação
-        }
-      });
+    // Tenta fazer login para verificar se existe
+    await signInWithEmailAndPassword(auth, adminEmail, adminSenha);
+    console.log("Admin já existe");
   } catch (error) {
-    console.error("Erro ao criar admin:", error);
+    if (error.code === "auth/user-not-found") {
+      try {
+        const userCred = await createUserWithEmailAndPassword(auth, adminEmail, adminSenha);
+        await setDoc(doc(db, "usuarios", userCred.user.uid), {
+          nome: "Administrador",
+          email: adminEmail,
+          role: "admin",
+          criadoEm: new Date()
+        });
+        console.log("Admin criado com sucesso");
+      } catch (createError) {
+        console.error("Erro ao criar admin:", createError);
+      }
+    }
+  } finally {
+    // Garante que não permaneça logado após verificação
+    await auth.signOut();
   }
 }
 
-// Chama a função ao carregar
-criarAdminPadrao();
+// Executa ao carregar a página
+window.addEventListener('DOMContentLoaded', () => {
+  verificarAdmin();
+  
+  // Controle de formulários
+  document.getElementById('showRegister')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'block';
+  });
 
-// Controle de formulários
-document.getElementById('showRegister').addEventListener('click', (e) => {
-  e.preventDefault();
-  document.getElementById('loginForm').style.display = 'none';
-  document.getElementById('registerForm').style.display = 'block';
+  document.getElementById('showLogin')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+  });
+
+  // Cadastro
+  document.getElementById('formCadastro')?.addEventListener('submit', handleCadastro);
+
+  // Login
+  document.getElementById('formLogin')?.addEventListener('submit', handleLogin);
 });
 
-document.getElementById('showLogin').addEventListener('click', (e) => {
-  e.preventDefault();
-  document.getElementById('registerForm').style.display = 'none';
-  document.getElementById('loginForm').style.display = 'block';
-});
-
-// Cadastro
-document.getElementById('formCadastro').addEventListener('submit', async (e) => {
+// 2. Função de cadastro
+async function handleCadastro(e) {
   e.preventDefault();
   const msg = document.getElementById('msgCadastro');
   msg.textContent = '';
@@ -85,6 +97,8 @@ document.getElementById('formCadastro').addEventListener('submit', async (e) => 
     showError(msg, 'Senha deve ter no mínimo 6 caracteres');
     return;
   }
+
+  showLoading(true);
 
   try {
     const userCred = await createUserWithEmailAndPassword(auth, email, senha);
@@ -106,11 +120,13 @@ document.getElementById('formCadastro').addEventListener('submit', async (e) => 
 
   } catch (error) {
     handleAuthError(error, msg);
+  } finally {
+    showLoading(false);
   }
-});
+}
 
-// Login
-document.getElementById('formLogin').addEventListener('submit', async (e) => {
+// 3. Função de login
+async function handleLogin(e) {
   e.preventDefault();
   const msg = document.getElementById('msgLogin');
   msg.textContent = '';
@@ -119,20 +135,38 @@ document.getElementById('formLogin').addEventListener('submit', async (e) => {
   const email = document.getElementById('emailLogin').value.trim();
   const senha = document.getElementById('senhaLogin').value;
 
+  showLoading(true);
+
   try {
-    await signInWithEmailAndPassword(auth, email, senha);
+    const userCred = await signInWithEmailAndPassword(auth, email, senha);
+    
+    // Verifica se existe no Firestore
+    const userDoc = await getDoc(doc(db, "usuarios", userCred.user.uid));
+    
+    if (!userDoc.exists()) {
+      await auth.signOut();
+      throw new Error("Usuário não registrado no sistema");
+    }
+
     showSuccess(msg, 'Login efetuado! Redirecionando...');
     
     setTimeout(() => {
-      window.location.href = 'index.html';
+      window.location.href = 'dashboard.html'; // Altere para sua página principal
     }, 1500);
 
   } catch (error) {
     handleAuthError(error, msg);
+  } finally {
+    showLoading(false);
   }
-});
+}
 
 // Funções auxiliares
+function showLoading(show) {
+  const loading = document.getElementById('loading');
+  if (loading) loading.style.display = show ? 'flex' : 'none';
+}
+
 function showError(element, message) {
   element.textContent = `❌ ${message}`;
   element.classList.add('erro');
@@ -144,13 +178,16 @@ function showSuccess(element, message) {
 }
 
 function handleAuthError(error, element) {
-  const messages = {
-    'auth/email-already-in-use': 'E-mail já cadastrado',
+  const errorMap = {
     'auth/invalid-email': 'E-mail inválido',
-    'auth/weak-password': 'Senha muito fraca',
+    'auth/user-disabled': 'Conta desativada',
     'auth/user-not-found': 'Usuário não encontrado',
     'auth/wrong-password': 'Senha incorreta',
-    'default': `Erro: ${error.message}`
+    'auth/email-already-in-use': 'E-mail já cadastrado',
+    'auth/operation-not-allowed': 'Operação não permitida',
+    'auth/weak-password': 'Senha muito fraca (mínimo 6 caracteres)',
+    'default': `Erro: ${error.message || 'Falha na autenticação'}`
   };
-  showError(element, messages[error.code] || messages['default']);
+  
+  showError(element, errorMap[error.code] || errorMap['default']);
 }
