@@ -21,51 +21,40 @@
     <button onclick="cadastrar()">Cadastrar</button>
     <div id="mensagem" class="msg"></div>
 
-    <script>
-        // Função principal de cadastro
-        function cadastrar() {
-            const nome = document.getElementById('nome').value;
-            const email = document.getElementById('email').value;
-            const senha = document.getElementById('senha').value;
-            const msg = document.getElementById('mensagem');
+    <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
-            // Validação básica
-            if (!nome || !email || !senha) {
-                msg.textContent = "Preencha todos os campos!";
-                msg.className = "msg erro";
-                return;
-            }
+  const firebaseConfig = {
+    apiKey: "SUA_API_KEY",
+    authDomain: "SEU_DOMINIO",
+    projectId: "SEU_ID",
+    storageBucket: "SEU_BUCKET",
+    messagingSenderId: "SENDER_ID",
+    appId: "APP_ID"
+  };
 
-            if (senha.length < 6) {
-                msg.textContent = "A senha deve ter pelo menos 6 caracteres!";
-                msg.className = "msg erro";
-                return;
-            }
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-            // Recupera usuários existentes
-            const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+  async function cadastrar(event) {
+    event.preventDefault();
 
-            // Verifica se e-mail já existe
-            if (usuarios.some(user => user.email === email)) {
-                msg.textContent = "Este e-mail já está cadastrado!";
-                msg.className = "msg erro";
-                return;
-            }
+    const nome = document.getElementById('nome').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const senha = document.getElementById('senha').value;
 
-            // Adiciona novo usuário
-            usuarios.push({ nome, email, senha });
-            localStorage.setItem('usuarios', JSON.stringify(usuarios));
+    try {
+      await addDoc(collection(db, "usuarios"), {
+        nome, email, senha
+      });
+      alert("Usuário cadastrado com sucesso!");
+    } catch (e) {
+      alert("Erro ao cadastrar: " + e.message);
+    }
+  }
+</script>
 
-            // Feedback
-            msg.textContent = "Cadastro realizado com sucesso!";
-            msg.className = "msg sucesso";
-            
-            // Limpa os campos
-            document.getElementById('nome').value = "";
-            document.getElementById('email').value = "";
-            document.getElementById('senha').value = "";
-        }
-    </script>
 </body>
 </html>
 
