@@ -60,5 +60,45 @@
     </div>
 
     <script src="script.js"></script>
+    <!-- Adicione no final do body -->
+<div id="auth-container" style="position: fixed; top: 10px; right: 10px;">
+  <div id="login-form">
+    <input type="email" id="login-email" placeholder="E-mail">
+    <input type="password" id="login-password" placeholder="Senha">
+    <button onclick="login()">Entrar</button>
+    <button onclick="register()">Registrar</button>
+  </div>
+  <button id="logout-btn" style="display:none;" onclick="logout()">Sair</button>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+  // Controle de autenticação (não interfere no seu código existente)
+  auth.onAuthStateChanged(user => {
+    document.getElementById('logout-btn').style.display = user ? 'block' : 'none';
+    document.getElementById('login-form').style.display = user ? 'none' : 'block';
+  });
+
+  function login() {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    auth.signInWithEmailAndPassword(email, password)
+      .catch(error => alert(error.message));
+  }
+
+  function register() {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    auth.createUserWithEmailAndPassword(email, password)
+      .catch(error => alert(error.message));
+  }
+
+  function logout() {
+    auth.signOut();
+  }
+</script>
 </body>
 </html>
