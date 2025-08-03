@@ -225,3 +225,28 @@ async function login(email, password) {
     throw error;
   }
 }
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
+
+const auth = getAuth();
+
+async function fazerLogin(email, senha) {
+  try {
+    // 1. Faz login com Firebase Auth
+    const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+    
+    // 2. Redireciona após login bem-sucedido
+    window.location.href = 'dashboard.html'; // Ou sua página desejada
+    
+  } catch (error) {
+    console.error("Erro no login:", error);
+    document.getElementById('msgErro').textContent = "E-mail ou senha incorretos";
+  }
+}
+
+// Vincula ao formulário
+document.getElementById('formLogin').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const email = document.getElementById('email').value;
+  const senha = document.getElementById('senha').value;
+  fazerLogin(email, senha);
+});
